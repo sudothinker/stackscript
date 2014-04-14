@@ -53,7 +53,7 @@ source <ssinclude StackScriptID="1"> # StackScript Bash Library
 system_update
 
 source <ssinclude StackScriptID="124"> # lib-system
-system_install_mercurial
+system_install_git
 system_start_etc_dir_versioning #start recording changes of /etc config files
 
 # Configure system
@@ -96,14 +96,9 @@ system_record_etc_dir_changes "Installed fail2ban" # SS124
 system_security_ufw_configure_basic
 system_record_etc_dir_changes "Configured UFW" # SS124
 
-source <ssinclude StackScriptID="126"> # lib-python
-python_install
-system_record_etc_dir_changes "Installed python" # SS124
-
 # lib-system - SS124
 system_install_utils
 system_install_build
-system_install_subversion
 system_install_git
 system_record_etc_dir_changes "Installed common utils"
 
