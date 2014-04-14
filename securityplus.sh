@@ -41,6 +41,8 @@
 # <UDF name="sys_private_ip" Label="Private IP" default="" example="Configure network card to listen on this Private IP (if enabled in Linode/Remote Access settings tab). See http://library.linode.com/networking/configuring-static-ip-interfaces" />
 # <UDF name="setup_monit" label="Install Monit system monitoring?" oneof="Yes,No" default="Yes" />
 
+# <UDF name="setup_deploy_user" label="Create a deploy user?" oneof="Yes,No" default="Yes" />
+
 set -e
 set -u
 #set -x
@@ -240,6 +242,16 @@ Monit web interface is at http://${RDNS}:2812/ (use your system username/passwor
 
 EOD
 fi
+
+if [ "$SETUP_DEPLOY_USER" == "Yes" ]; then
+    # Add deploy user
+    echo "deploy:deploy:1000:1000::/home/deploy:/bin/bash" | newusers
+    cp -a /etc/skel/.[a-z]* /home/deploy/
+    chown -R deploy /home/deploy
+    # Add to sudoers(?)
+    echo "deploy    ALL=(ALL) ALL" >> /etc/sudoers
+fi
+
 
 cat >> ~/setup_message <<EOD
 To access your server ssh to $USER_NAME@$RDNS
