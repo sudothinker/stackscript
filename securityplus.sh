@@ -53,7 +53,6 @@ source <ssinclude StackScriptID="1"> # StackScript Bash Library
 system_update
 
 source <ssinclude StackScriptID="124"> # lib-system
-system_install_git
 system_start_etc_dir_versioning #start recording changes of /etc config files
 
 # Configure system
