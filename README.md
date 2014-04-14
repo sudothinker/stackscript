@@ -1,0 +1,4 @@
+stackscript
+===========
+
+Linode setup
