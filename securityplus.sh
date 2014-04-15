@@ -253,6 +253,34 @@ if [ "$SETUP_DEPLOY_USER" == "Yes" ]; then
     echo "deploy    ALL=(ALL) ALL" >> /etc/sudoers
 fi
 
+# Installing Ruby
+  export RUBY_VERSION="ruby-2.0.0p247"
+  log "Installing Ruby $RUBY_VERSION"
+
+  log "Downloading: (from calling wget ftp://ftp.ruby-lang.org/pub/ruby/2.0/$RUBY_VERSION.tar.gz)" 
+  
+  log `wget ftp://ftp.ruby-lang.org/pub/ruby/2.0/$RUBY_VERSION.tar.gz`
+
+  log "tar output:"
+  log `tar xzf $RUBY_VERSION.tar.gz`
+  rm "$RUBY_VERSION.tar.gz"
+  cd $RUBY_VERSION
+
+  log "current directory: `pwd`"
+  log ""
+  log "Ruby Configuration output: (from calling ./configure)" 
+  log `./configure` 
+
+  log ""
+  log "Ruby make output: (from calling make)"
+  log `make`
+
+  log ""
+  log "Ruby make install output: (from calling make install)"
+  log `make install` 
+  cd ..
+  rm -rf $RUBY_VERSION
+  log "Ruby installed!"
 
 cat >> ~/setup_message <<EOD
 To access your server ssh to $USER_NAME@$RDNS
