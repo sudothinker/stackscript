@@ -26,7 +26,6 @@
 # <UDF name="setup_mongodb" label="Install MongoDB" oneof="Yes,No" default="No" />
 
 # <UDF name="sys_private_ip" Label="Private IP" default="" example="Configure network card to listen on this Private IP (if enabled in Linode/Remote Access settings tab). See http://library.linode.com/networking/configuring-static-ip-interfaces" />
-# <UDF name="setup_monit" label="Install Monit system monitoring?" oneof="Yes,No" default="Yes" />
 
 # <UDF name="setup_deploy_user" label="Create a deploy user?" oneof="Yes,No" default="Yes" />
 
