@@ -237,6 +237,10 @@ system_security_fail2ban
 system_security_ufw_install
 system_security_ufw_configure_basic
 system_sshd_pubkeyauthentication Yes
+system_sshd_permitrootlogin No
+system_sshd_passwordauthentication No
+system_lock_user "root"
+
 /etc/init.d/ssh restart
 
 log "Installing Ruby 2.0-$RUBY_RELEASE"
