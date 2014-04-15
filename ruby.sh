@@ -1,14 +1,17 @@
 #!/bin/bash
 # stackscript: nginx, ruby, passenger, redis
-# Installs Ruby 1.9.2 + Nginx + Passenger + Git + Bundler + Redis + Deploy User
-# Things to remember after install or to automate later:
-# - adjust server timezone if required
-# - put SSL certificate files at /usr/local/share/ca-certificates/
-# - set up nginx to point to deployment app and eventual static site
+# Installs Ruby 2.0 + Nginx + Passenger + Git + Bundler + Redis + Deploy User
+# To automate:
 # - create logrotate file to the deployed app logs
 # - generate github ssh deployment keys
+# - god setup
+# - restart on boot
+# - configure nginx for the rails app, set up nginx to point to deployment app and eventual static site
+# - passenger vs puma / unicorn
+#
+# After running:
 # - setup reverse DNS on Linode control panel
-# - run cap production deploy:setup to configure initial files
+# - put SSL certificate files at /usr/local/share/ca-certificates/
 #
 # <UDF name="r_env" Label="Rails/Rack environment to run" default="production" />
 # <UDF name="nginx_release" Label="nginx Release" default="1.0.4" example="1.0.4" />
