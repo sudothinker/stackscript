@@ -23,25 +23,17 @@
 # <UDF name="postgresql_user" label="PostgreSQL database user" example="PostgreSQL database user name, ASCII only." default="" />
 # <UDF name="postgresql_password" label="PostgreSQL user password" default="" />
 
-# <UDF name="setup_mysql" label="Configure MySQL and create database?" oneof="Yes,No" default="No" />
-# <UDF name="mysql_database_password" label="MySQL root Password" default="" />
-# <UDF name="mysql_database" label="MySQL database name" example="MySQL database name, ASCII only." default="" />
-# <UDF name="mysql_user" label="MySQL database user" example="MySQL database user name, ASCII only." default="" />
-# <UDF name="mysql_password" label="MySQL user password" default="" />
-
 # <UDF name="setup_mongodb" label="Install MongoDB" oneof="Yes,No" default="No" />
-
-# <UDF name="setup_apache" label="Install Apache" oneof="Yes,No" default="Yes" />
-
-# <UDF name="setup_django_project" label="Configure sample django/mod_wsgi project?" oneof="Standalone,InUserHome,InUserHomeRoot,No" default="Standalone" example="Standalone: project will be created in /srv/project_name directory under new user account; InUserHome: project will be created in /home/$user/project_name; InUserHomeRoot: project will be created in user's home directory (/home/$user)." />
-# <UDF name="django_domain" label="Django domain" default="" example="Your server domain configured in the DNS. Leave blank for RDNS (*.members.linode.com)." />
-# <UDF name="django_project_name" label="Django project name" default="my_project" example="Name of your django project (if 'Create sample project' is selected), i.e. my_website." />
-# <UDF name="django_user" label="Django project owner user" default="" example="System user that will be used to run the mod-wsgi project process in the 'Standalone' setup mode. Defaults to unprivileged account name provided above." />
 
 # <UDF name="sys_private_ip" Label="Private IP" default="" example="Configure network card to listen on this Private IP (if enabled in Linode/Remote Access settings tab). See http://library.linode.com/networking/configuring-static-ip-interfaces" />
 # <UDF name="setup_monit" label="Install Monit system monitoring?" oneof="Yes,No" default="Yes" />
 
 # <UDF name="setup_deploy_user" label="Create a deploy user?" oneof="Yes,No" default="Yes" />
+
+# TODO
+# god
+# redis
+# elasticsearch
 
 set -e
 set -u
@@ -125,17 +117,6 @@ if [ "$SETUP_POSTGRESQL" == "Yes" ]; then
     system_record_etc_dir_changes "Configured PostgreSQL"
 fi
 
-# Install MySQL and setup database
-if [ "$SETUP_MYSQL" == "Yes" ]; then
-    set +u # ignore undefined variables in Linode's SS1
-    mysql_install "$MYSQL_DATABASE_PASSWORD" && mysql_tune 30
-    mysql_create_database "$MYSQL_DATABASE_PASSWORD" "$MYSQL_DATABASE"
-    mysql_create_user "$MYSQL_DATABASE_PASSWORD" "$MYSQL_USER" "$MYSQL_PASSWORD"
-    mysql_grant_user "$MYSQL_DATABASE_PASSWORD" "$MYSQL_USER" "$MYSQL_DATABASE"
-    set -u
-    system_record_etc_dir_changes "Configured MySQL"
-fi
-
 # Install MongoDB
 if [ "$SETUP_MONGODB" == "Yes" ]; then
     source <ssinclude StackScriptID="128"> # lib-mongodb
@@ -145,50 +126,6 @@ fi
 
 # Setup and configure sample django project
 RDNS=$(get_rdns_primary_ip)
-DJANGO_PROJECT_PATH=""
-
-if [ "$SETUP_DJANGO_PROJECT" != "No" ]; then
-    source <ssinclude StackScriptID="127"> # lib-django
-
-    if [ -z "$DJANGO_DOMAIN" ]; then DJANGO_DOMAIN=$RDNS; fi
-
-    case "$SETUP_DJANGO_PROJECT" in
-    Standalone)
-        DJANGO_PROJECT_PATH="/srv/$DJANGO_PROJECT_NAME"
-        if [ -n "$DJANGO_USER" ]; then
-            if [ "$DJANGO_USER" != "$USER_NAME" ]; then
-                system_add_system_user "$DJANGO_USER" "$DJANGO_PROJECT_PATH" "$USER_SHELL"
-            fi
-        else
-            DJANGO_USER=$USER_NAME
-        fi
-      ;;
-    InUserHome)
-        DJANGO_USER=$USER_NAME
-        DJANGO_PROJECT_PATH=$(system_get_user_home "$USER_NAME")/$DJANGO_PROJECT_NAME
-      ;;
-    InUserHomeRoot)
-        DJANGO_USER=$USER_NAME
-        DJANGO_PROJECT_PATH=$(system_get_user_home "$USER_NAME")
-      ;;
-    esac
-
-    django_create_project "$DJANGO_PROJECT_PATH"
-    django_change_project_owner "$DJANGO_PROJECT_PATH" "$DJANGO_USER"
-
-    if [ "$SETUP_APACHE" == "Yes" ]; then
-        django_configure_apache_virtualhost "$DJANGO_DOMAIN" "$DJANGO_PROJECT_PATH" "$DJANGO_USER"
-        touch /tmp/restart-apache2
-    fi
-    if [ "$SETUP_POSTGRESQL" == "Yes" ]; then
-        django_install_db_driver "$DJANGO_PROJECT_PATH" "psycopg2"
-        django_configure_db_settings "$DJANGO_PROJECT_PATH" "postgresql_psycopg2" "$POSTGRESQL_DATABASE" "$POSTGRESQL_USER" "$POSTGRESQL_PASSWORD" "127.0.0.1" ""
-    fi
-    if [ "$SETUP_MYSQL" == "Yes" ]; then
-        django_install_db_driver "$DJANGO_PROJECT_PATH" "MySQL-python"
-    fi
-    system_record_etc_dir_changes "Configured django project '$DJANGO_PROJECT_NAME'"
-fi
 
 if [ -n "$SYS_PRIVATE_IP" ]; then
     system_configure_private_network "$SYS_PRIVATE_IP"
@@ -198,29 +135,6 @@ fi
 restart_services
 restart_initd_services
 
-if [ "$SETUP_MONIT" == "Yes" ]; then
-    source <ssinclude StackScriptID="130"> # lib-monit
-    monit_install
-    system_record_etc_dir_changes "Installed Monit"
-
-    monit_configure_email "$NOTIFY_EMAIL"
-    monit_configure_web $(system_primary_ip)
-    system_record_etc_dir_changes "Configured Monit interfaces"
-
-    monit_def_system "$SYS_HOSTNAME"
-    monit_def_rootfs
-    monit_def_cron
-    monit_def_postfix
-    monit_def_ping_google
-    if [ "$SETUP_POSTGRESQL" == "Yes" ]; then monit_def_postgresql; fi
-    if [ "$SETUP_MYSQL" == "Yes" ]; then monit_def_mysql; fi
-    if [ "$SETUP_MONGODB" == "Yes" ]; then monit_def_mongodb; fi
-    if [ "$SETUP_APACHE" == "Yes" ]; then monit_def_apache; fi
-    #if [ "$SETUP_MEMCACHE" == "Yes" ]; then monit_def_memcached; fi
-    system_record_etc_dir_changes "Created Monit rules for installed services"
-    monit reload
-fi
-
 # Send info message
 cat > ~/setup_message <<EOD
 Hi,
@@ -229,20 +143,6 @@ Your Linode VPS configuration is completed.
 
 EOD
 
-if [ "$SETUP_DJANGO_PROJECT" != "No" ]; then
-    cat >> ~/setup_message <<EOD
-You can now navigate to http://${DJANGO_DOMAIN}/ to see your web server running.
-The Django project files are in $DJANGO_PROJECT_PATH/app.
-
-EOD
-fi
-
-if [ "$SETUP_MONIT" == "Yes" ]; then
-    cat >> ~/setup_message <<EOD
-Monit web interface is at http://${RDNS}:2812/ (use your system username/password).
-
-EOD
-fi
 
 if [ "$SETUP_DEPLOY_USER" == "Yes" ]; then
     # Add deploy user
