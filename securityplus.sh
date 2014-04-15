@@ -21,10 +21,10 @@
 
 # <UDF name="setup_mongodb" label="Install MongoDB" oneof="Yes,No" default="No" />
 
-# <UDF name="sys_private_ip" Label="Private IP" default="" example="Configure network card to listen on this Private IP (if enabled in Linode/Remote Access settings tab). See http://library.linode.com/networking/configuring-static-ip-interfaces" />
 # <UDF name="r_env" Label="Rails/Rack environment to run" default="production" />
 # <UDF name="nginx_release" Label="nginx Release" default="1.0.4" example="1.0.4" />
 # <UDF name="redis_release" Label="Redis Release" default="2.2.11" example="2.2.11" />
+# <UDF name="ruby_release" Label="Ruby 2.0 Release" default="ruby-2.0.0p247" example="ruby-2.0.0p247" /
 # <UDF name="deploy_user" Label="Name of deployment user" default="app" />
 # <UDF name="deploy_password" Label="Password for deployment user" />
 # <UDF name="deploy_sshkey" Label="Deployment user public ssh key" />
@@ -32,10 +32,7 @@
 
 # TODO
 # god
-# redis
 # elasticsearch
-# nginx
-# puma/unicorn
 
 set -e
 set -u
