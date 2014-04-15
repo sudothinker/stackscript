@@ -13,11 +13,10 @@
 # <UDF name="r_env" Label="Rails/Rack environment to run" default="production" />
 # <UDF name="nginx_release" Label="nginx Release" default="1.0.4" example="1.0.4" />
 # <UDF name="redis_release" Label="Redis Release" default="2.2.11" example="2.2.11" />
-# <UDF name="ruby_release" Label="Ruby 1.9.2 Release" default="p290" example="p290" />
-# <UDF name="deploy_user" Label="Name of deployment user" default="app" />
+# <UDF name="ruby_release" Label="Ruby 2.0 Release" default="2.0.0p247" example="2.0.0p247" /
+# <UDF name="deploy_user" Label="Name of deployment user" default="deploy" />
 # <UDF name="deploy_password" Label="Password for deployment user" />
 # <UDF name="deploy_sshkey" Label="Deployment user public ssh key" />
-# <UDF name="setup_mongodb" label="Install MongoDB" oneof="Yes,No" default="No" />
 # <UDF name="new_hostname_fqdn" Label="Server's fully-qualified hostname" default="appserver.example.com" />
 
 NEW_HOSTNAME=`echo $NEW_HOSTNAME_FQDN | cut -d. -f1`
@@ -56,7 +55,7 @@ function install_essentials {
 
 function download_and_extract_ruby {
   cd /usr/local/src
-  wget ftp://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz
+  wget ftp://ftp.ruby-lang.org/pub/ruby/2.0/$RUBY_VERSION.tar.gz
   tar xzf $RUBY_VERSION.tar.gz
   cd $RUBY_VERSION
 }
@@ -240,8 +239,8 @@ system_security_ufw_configure_basic
 system_sshd_pubkeyauthentication Yes
 /etc/init.d/ssh restart
 
-log "Installing Ruby 1.9.2-$RUBY_RELEASE"
-export RUBY_VERSION="ruby-1.9.2-$RUBY_RELEASE"
+log "Installing Ruby 2.0-$RUBY_RELEASE"
+export RUBY_VERSION="ruby-$RUBY_RELEASE"
 download_and_extract_ruby
 compile_and_install_ruby
 
