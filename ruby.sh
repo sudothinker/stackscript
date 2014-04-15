@@ -1,6 +1,6 @@
 #!/bin/bash
 # stackscript: nginx, ruby, passenger, redis
-# Installs Ruby 2.0 + Nginx + Passenger + Git + Bundler + Redis + Deploy User
+# Installs Ruby 2.0 + Nginx + Passenger + Git + Bundler + Redis + Mongo + Deploy User
 # To automate:
 # - create logrotate file to the deployed app logs
 # - generate github ssh deployment keys
